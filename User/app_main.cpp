@@ -90,7 +90,7 @@ extern "C" void app_main()
 
   LibXR::USB::CDCUart cdc(4096, 4096, 8), cdc1;
 
-  LibXR::CH32USBDeviceFS usb_dev(
+  LibXR::CH32USBOtgFS usb_dev(
       /* EP */
       {
           {ep0_buffer},
@@ -110,7 +110,7 @@ extern "C" void app_main()
 
   usb_dev.Start(false);
 
-  LibXR::CH32USBDeviceHS usb_dev_hs(
+  LibXR::CH32USBOtgHS usb_dev_hs(
       /* EP */
       {
           {ep0_buffer_hs},
