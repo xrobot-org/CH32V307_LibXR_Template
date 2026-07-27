@@ -11,7 +11,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)
 
 # Toolchain
-set(COMPILER_PREFIX "riscv32-unknown-elf-")
+set(COMPILER_PREFIX "riscv32-unknown-elf-" CACHE STRING "Cross-compiler prefix")
 set(CMAKE_C_COMPILER ${COMPILER_PREFIX}gcc)
 set(CMAKE_CXX_COMPILER ${COMPILER_PREFIX}g++)
 set(CMAKE_ASM_COMPILER ${COMPILER_PREFIX}gcc)
@@ -25,11 +25,35 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/build)
 
 project(CH32V307VC)
 
+# WCH GCC 15 has no Zaamo-only ilp32f multilib selector. Query the compatible
+# hard-float library directories without changing the ISA used for compilation.
+execute_process(
+  COMMAND ${CMAKE_C_COMPILER}
+          -march=rv32imafc_zaamo_zalrsc
+          -mabi=ilp32f
+          -print-file-name=libgcc.a
+  OUTPUT_VARIABLE WCH_ILP32F_LIBGCC
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  COMMAND_ERROR_IS_FATAL ANY
+)
+execute_process(
+  COMMAND ${CMAKE_C_COMPILER}
+          -march=rv32imafc_zaamo_zalrsc
+          -mabi=ilp32f
+          -print-file-name=libc_nano.a
+  OUTPUT_VARIABLE WCH_ILP32F_LIBC
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  COMMAND_ERROR_IS_FATAL ANY
+)
+get_filename_component(WCH_ILP32F_LIBGCC_DIR "${WCH_ILP32F_LIBGCC}" DIRECTORY)
+get_filename_component(WCH_ILP32F_LIBC_DIR "${WCH_ILP32F_LIBC}" DIRECTORY)
+link_directories(BEFORE "${WCH_ILP32F_LIBGCC_DIR}" "${WCH_ILP32F_LIBC_DIR}")
+
 # Enable languages
 enable_language(C CXX ASM)
 
 # Flags
-set(CPU_FLAGS "-march=rv32imacf_zicsr_zifencei -mabi=ilp32f -msmall-data-limit=8 -mno-save-restore")
+set(CPU_FLAGS "-march=rv32imcf_zicsr_zifencei_zaamo -mabi=ilp32f -msmall-data-limit=8 -mno-save-restore")
 set(COMMON_FLAGS "-Wall -Wextra -fno-builtin -ffunction-sections -fdata-sections -fsigned-char -fsingle-precision-constant -Wunused -Wuninitialized")
 
 set(CMAKE_C_FLAGS "${CPU_FLAGS} ${COMMON_FLAGS} -fmessage-length=0" CACHE INTERNAL "" FORCE)
@@ -46,7 +70,7 @@ add_link_options(
   -Wl,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map
   --specs=nano.specs
   --specs=nosys.specs
-  -march=rv32imacf_zicsr_zifencei
+  -march=rv32imcf_zicsr_zifencei_zaamo
   -mabi=ilp32f
   -flto
   -lm -lc
