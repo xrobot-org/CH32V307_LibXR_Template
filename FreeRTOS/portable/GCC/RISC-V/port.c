@@ -272,15 +272,17 @@ void vPortExitCritical( void )
 portUBASE_TYPE xPortSetInterruptMask(void)
 {
     portUBASE_TYPE uvalue=0;
-    __asm volatile("csrrw %0, mstatus, %1":"=r"(uvalue):"r"(0x7800));
+    __asm volatile("csrrw %0, mstatus, %1\n\tfence.i"
+                   : "=r"(uvalue)
+                   : "r"(0x7800)
+                   : "memory");
     return uvalue;
 }
 
 /*-----------------------------------------------------------*/
 void vPortClearInterruptMask(portUBASE_TYPE uvalue)
 {
-    __asm volatile("csrw  mstatus, %0"::"r"(uvalue));
+    __asm volatile("csrw  mstatus, %0"::"r"(uvalue):"memory");
 }
-
 
 
