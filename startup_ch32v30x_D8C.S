@@ -356,7 +356,7 @@ handle_reset:
     li t0, 0x1f
     csrw 0xbc0, t0
 /* Enable interrupt nesting and hardware stack */
-	li t0, 0x1f
+	li t0, 0x07
 	csrw 0x804, t0
 /* Enable floating point and global interrupt, configure privileged mode */
    	li t0, 0x7800           
@@ -370,5 +370,4 @@ handle_reset:
 	la t0, main
 	csrw mepc, t0
 	mret
-
 
