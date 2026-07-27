@@ -81,6 +81,49 @@ interrupt stack after the scheduler has started. */
 #endif
 
 static UBaseType_t uxCriticalNesting = 0xaaaaaaaa;
+
+#if !((configMTIME_BASE_ADDRESS != 0) && (configMTIMECMP_BASE_ADDRESS != 0))
+static uint32_t ulSysTickIncrement = 0U;
+
+static uint64_t prvReadSysTickCounter(void)
+{
+    volatile uint32_t * const pulCounter = (volatile uint32_t *)&SysTick->CNT;
+    uint32_t ulHighBefore;
+    uint32_t ulLow;
+    uint32_t ulHighAfter;
+
+    do
+    {
+        ulHighBefore = pulCounter[1];
+        ulLow = pulCounter[0];
+        ulHighAfter = pulCounter[1];
+    } while (ulHighBefore != ulHighAfter);
+
+    return ((uint64_t)ulHighAfter << 32U) | ulLow;
+}
+
+static uint64_t prvReadSysTickCompare(void)
+{
+    volatile uint32_t * const pulCompare = (volatile uint32_t *)&SysTick->CMP;
+    return ((uint64_t)pulCompare[1] << 32U) | pulCompare[0];
+}
+
+static void prvWriteSysTickCompare(uint64_t ullCompare)
+{
+    volatile uint32_t * const pulCompare = (volatile uint32_t *)&SysTick->CMP;
+
+    pulCompare[0] = 0xffffffffUL;
+    pulCompare[1] = (uint32_t)(ullCompare >> 32U);
+    pulCompare[0] = (uint32_t)ullCompare;
+}
+
+static BaseType_t prvSysTickDeadlineReached(uint64_t ullNow, uint64_t ullDeadline)
+{
+    const uint64_t ullDistance = ullNow - ullDeadline;
+    return ((ullDistance & (1ULL << 63U)) == 0U) ? pdTRUE : pdFALSE;
+}
+#endif
+
 /*
  * Setup the timer to generate the tick interrupts.  The implementation in this
  * file is weak to allow application writers to change the timer used to
@@ -158,14 +201,20 @@ void vPortSetupTimerInterrupt( void )
     /* set systick is lowest priority */
     NVIC_SetPriority(SysTicK_IRQn,0xf0);
 
+    configASSERT(configTICK_RATE_HZ != 0U);
+    configASSERT((configCPU_CLOCK_HZ % configTICK_RATE_HZ) == 0U);
+    ulSysTickIncrement = (uint32_t)(configCPU_CLOCK_HZ / configTICK_RATE_HZ);
+    configASSERT(ulSysTickIncrement != 0U);
+
+    NVIC_DisableIRQ(SysTicK_IRQn);
+    SysTick->CTLR = 0U;
+    SysTick->SR = 0U;
+    SysTick->CNT = 0U;
+    prvWriteSysTickCompare(ulSysTickIncrement);
+    NVIC_ClearPendingIRQ(SysTicK_IRQn);
+    SysTick->CTLR = 0x07U;
     NVIC_EnableIRQ(Software_IRQn);
     NVIC_EnableIRQ(SysTicK_IRQn);
-
-    SysTick->CTLR= 0;
-    SysTick->SR  = 0;
-    SysTick->CNT = 0;
-    SysTick->CMP = configCPU_CLOCK_HZ/configTICK_RATE_HZ;
-    SysTick->CTLR= 0xf;
 }
 
 #endif /* ( configMTIME_BASE_ADDRESS != 0 ) && ( configMTIME_BASE_ADDRESS != 0 ) */
@@ -234,18 +283,55 @@ void vPortEndScheduler( void )
 	for( ;; );
 }
 /*-----------------------------------------------------------*/
-void SysTick_Handler(void) __attribute__((interrupt));
+void SysTick_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void SysTick_Handler( void )
 {
-	extern void libxr_systick_handler(void);
-	libxr_systick_handler();
     GET_INT_SP();
     portDISABLE_INTERRUPTS();
-    SysTick->SR=0;
-    if( xTaskIncrementTick() != pdFALSE )
+
+    if ((SysTick->SR & 1U) != 0U)
     {
-        portYIELD();
+        uint64_t ullDeadline = prvReadSysTickCompare();
+        uint64_t ullNow = prvReadSysTickCounter();
+        uint64_t ullElapsedTicks = 0ULL;
+        BaseType_t xSwitchRequired = pdFALSE;
+
+        do
+        {
+            if (prvSysTickDeadlineReached(ullNow, ullDeadline) != pdFALSE)
+            {
+                const uint64_t ullOverdueCycles = ullNow - ullDeadline;
+                uint64_t ullDueTicks = 1ULL;
+
+                if (ullOverdueCycles >= ulSysTickIncrement)
+                {
+                    ullDueTicks += ullOverdueCycles / ulSysTickIncrement;
+                }
+
+                ullElapsedTicks += ullDueTicks;
+                ullDeadline += ullDueTicks * ulSysTickIncrement;
+                prvWriteSysTickCompare(ullDeadline);
+            }
+
+            SysTick->SR = 0U;
+            ullNow = prvReadSysTickCounter();
+        } while (prvSysTickDeadlineReached(ullNow, ullDeadline) != pdFALSE);
+
+        while (ullElapsedTicks != 0U)
+        {
+            if (xTaskIncrementTick() != pdFALSE)
+            {
+                xSwitchRequired = pdTRUE;
+            }
+            --ullElapsedTicks;
+        }
+
+        if (xSwitchRequired != pdFALSE)
+        {
+            portYIELD();
+        }
     }
+
     portENABLE_INTERRUPTS();
     FREE_INT_SP();
 }
@@ -284,5 +370,3 @@ void vPortClearInterruptMask(portUBASE_TYPE uvalue)
 {
     __asm volatile("csrw  mstatus, %0"::"r"(uvalue):"memory");
 }
-
-
