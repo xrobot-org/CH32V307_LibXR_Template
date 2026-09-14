@@ -25,6 +25,10 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/build)
 
 project(CH32V307VC)
 
+if(CMAKE_C_COMPILER_VERSION VERSION_LESS 15.2)
+  message(FATAL_ERROR "CH32V307 LibXR template requires WCH GCC 15.2 or newer")
+endif()
+
 # WCH GCC 15 has no Zaamo-only ilp32f multilib selector. Query the compatible
 # hard-float library directories without changing the ISA used for compilation.
 execute_process(
