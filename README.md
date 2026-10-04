@@ -53,11 +53,11 @@ The output is `build/CH32V307VC.elf`, `build/CH32V307VC.hex` and `build/CH32V307
 
 ## 4. 烧录与运行 / Flash and Run
 
-`wch-riscv.cfg` 是 OpenOCD 配置，使用 WCH-LinkE（`wlinke` 适配器，SDI 接口，6 MHz），需要 WCH 版 OpenOCD（镜像中已包含）。`openocd -f wch-riscv.cfg` 启动调试服务。VS Code 中 `.vscode/launch.json` 的 `Launch CH32V307` 通过 Cortex-Debug 使用该配置，下载并调试 `build/CH32V307VC.elf`，`gdbPath` 为 `riscv32-unknown-elf-gdb`。
+`wch-riscv.cfg` 是 OpenOCD 配置，使用 WCH-LinkE（`wlinke` 适配器，SDI 接口，6 MHz），需要 WCH 版 OpenOCD（镜像中已包含）。`openocd -f wch-riscv.cfg` 启动调试服务。VS Code 中 `.vscode/launch.json` 的 `Launch CH32V307` 通过 Cortex-Debug 使用该配置，下载并调试 `build/CH32V307VC.elf`，`gdbPath` 为 `riscv32-wch-elf-gdb`。
 
 运行后 PB4 上的 LED 每 1000 ms 翻转一次，OTG FS 与 OTG HS 各枚举出一个 CDC 串口，OTG HS 的串口上提供 LibXR 终端。
 
-`wch-riscv.cfg` is an OpenOCD configuration for the WCH-LinkE (`wlinke` adapter, SDI interface, 6 MHz) and needs the WCH build of OpenOCD, which the image includes. `openocd -f wch-riscv.cfg` starts the debug server. In VS Code, `Launch CH32V307` in `.vscode/launch.json` uses this configuration through Cortex-Debug to download and debug `build/CH32V307VC.elf`, with `riscv32-unknown-elf-gdb` as `gdbPath`.
+`wch-riscv.cfg` is an OpenOCD configuration for the WCH-LinkE (`wlinke` adapter, SDI interface, 6 MHz) and needs the WCH build of OpenOCD, which the image includes. `openocd -f wch-riscv.cfg` starts the debug server. In VS Code, `Launch CH32V307` in `.vscode/launch.json` uses this configuration through Cortex-Debug to download and debug `build/CH32V307VC.elf`, with `riscv32-wch-elf-gdb` as `gdbPath`.
 
 At run time the LED on PB4 toggles every 1000 ms, USB OTG FS and OTG HS each enumerate one CDC serial port, and the LibXR terminal is available on the OTG HS serial port.
 
