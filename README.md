@@ -4,7 +4,7 @@ CH32V307 的 LibXR 模板工程 / LibXR template project for the CH32V307
 
 ## 1. 板子与平台 / Board and Platform
 
-模板使用 WCH CH32V307VC（RISC-V，带单精度浮点，系统时钟 144 MHz，`Link.ld` 按 256 KB Flash、64 KB RAM 配置），系统为 FreeRTOS，外设由 LibXR 的 `ch` 驱动提供。`User/main.c` 设置中断分组，创建运行 `app_main()` 的 FreeRTOS 任务并启动调度器，LibXR 应用代码位于 `User/app_main.cpp`。LibXR 是 `libxr/` 下的 Git 子模块，地址为 `https://github.com/xrobot-org/libxr.git`，所用版本由提交记录固定。
+模板使用 WCH CH32V307VC（RISC-V，带单精度浮点，系统时钟 144 MHz，`Link.ld` 按 256 KB Flash、64 KB RAM 配置），系统为 FreeRTOS，外设由 LibXR 的 `ch` 驱动提供。`User/main.c` 设置中断分组，创建运行 `app_main()` 的 FreeRTOS 任务并启动调度器，LibXR 应用代码位于 `User/app_main.cpp`。LibXR 是 `libxr/` 下的 Git 子模块，地址为 `https://github.com/xrobot-org/libxr.git`，本仓库记录的子模块提交固定所用的 LibXR 版本。
 
 ```text
 User/app_main.cpp         LibXR 应用代码 app_main()
@@ -18,7 +18,7 @@ wch-riscv.cfg             OpenOCD 配置（WCH-LinkE，SDI）
 libxr/                    LibXR 子模块
 ```
 
-The template uses the WCH CH32V307VC (RISC-V with single-precision floating point, 144 MHz system clock; `Link.ld` is set up for 256 KB Flash and 64 KB RAM) and runs FreeRTOS; the peripherals are provided by the LibXR `ch` driver. `User/main.c` sets the interrupt priority grouping, creates the FreeRTOS task that runs `app_main()` and starts the scheduler. The LibXR application code is in `User/app_main.cpp`. LibXR is the Git submodule `libxr/` at `https://github.com/xrobot-org/libxr.git`, and the commit record pins the version in use.
+The template uses the WCH CH32V307VC (RISC-V with single-precision floating point, 144 MHz system clock; `Link.ld` is set up for 256 KB Flash and 64 KB RAM) and runs FreeRTOS; the peripherals are provided by the LibXR `ch` driver. `User/main.c` sets the interrupt priority grouping, creates the FreeRTOS task that runs `app_main()` and starts the scheduler. The LibXR application code is in `User/app_main.cpp`. LibXR is the Git submodule `libxr/` at `https://github.com/xrobot-org/libxr.git`, and the submodule commit recorded in this repository pins the LibXR version in use.
 
 ## 2. 配置一览 / Configurations
 
