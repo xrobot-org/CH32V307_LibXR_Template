@@ -20,15 +20,11 @@ libxr/                    LibXR 子模块
 
 The template uses the WCH CH32V307VC (RISC-V with single-precision floating point, 144 MHz system clock; `Link.ld` is set up for 256 KB Flash and 64 KB RAM) and runs FreeRTOS; the peripherals are provided by the LibXR `ch` driver. `User/main.c` sets the interrupt priority grouping, creates the FreeRTOS task that runs `app_main()` and starts the scheduler. The LibXR application code is in `User/app_main.cpp`. LibXR is the Git submodule `libxr/` at `https://github.com/xrobot-org/libxr.git`, and the submodule commit recorded in this repository pins the LibXR version in use.
 
-## 2. 配置一览 / Configurations
+## 2. 示例程序 / Example Application
 
-| 配置 | 用途 |
-| --- | --- |
-| `User/app_main.cpp` | GPIO、I2C、UART、双 USB 与终端：创建 `LibXR::CH32Timebase`，调用 `LibXR::PlatformInit(3, 8192)`。PB4 上的 LED 由 `LibXR::Timer` 任务每 1000 ms 翻转一次；PB3 的按键产生下降沿中断（EXTI3），每次触发翻转 PA15 上的 LED。初始化 I2C1（PB6 / PB7，400 kHz）和 USART2（PA2 / PA3，115200 8N1）。USB OTG FS 与 OTG HS 各提供一个 CDC 串口，`LibXR::STDIO` 绑定到 OTG HS 的 CDC，其上运行 `LibXR::RamFS` 与 `LibXR::Terminal` |
+示例程序 `User/app_main.cpp` 演示 GPIO、I2C、UART、双 USB 与终端：创建 `LibXR::CH32Timebase`，调用 `LibXR::PlatformInit(3, 8192)`。PB4 上的 LED 由 `LibXR::Timer` 任务每 1000 ms 翻转一次；PB3 的按键产生下降沿中断（EXTI3），每次触发翻转 PA15 上的 LED。初始化 I2C1（PB6 / PB7，400 kHz）和 USART2（PA2 / PA3，115200 8N1）。USB OTG FS 与 OTG HS 各提供一个 CDC 串口，`LibXR::STDIO` 绑定到 OTG HS 的 CDC，其上运行 `LibXR::RamFS` 与 `LibXR::Terminal`。
 
-| Configuration | Purpose |
-| --- | --- |
-| `User/app_main.cpp` | GPIO, I2C, UART, dual USB and terminal: creates `LibXR::CH32Timebase` and calls `LibXR::PlatformInit(3, 8192)`. A `LibXR::Timer` task toggles the LED on PB4 every 1000 ms; the key on PB3 raises a falling-edge interrupt (EXTI3) that toggles the LED on PA15 on each press. I2C1 (PB6 / PB7, 400 kHz) and USART2 (PA2 / PA3, 115200 8N1) are initialized. USB OTG FS and OTG HS each provide one CDC serial port; `LibXR::STDIO` is bound to the OTG HS CDC, on which `LibXR::RamFS` and `LibXR::Terminal` run |
+The example application `User/app_main.cpp` shows GPIO, I2C, UART, dual USB and a terminal: it creates `LibXR::CH32Timebase` and calls `LibXR::PlatformInit(3, 8192)`. A `LibXR::Timer` task toggles the LED on PB4 every 1000 ms; the key on PB3 raises a falling-edge interrupt (EXTI3) that toggles the LED on PA15 on each press. I2C1 (PB6 / PB7, 400 kHz) and USART2 (PA2 / PA3, 115200 8N1) are initialized. USB OTG FS and OTG HS each provide one CDC serial port; `LibXR::STDIO` is bound to the OTG HS CDC, on which `LibXR::RamFS` and `LibXR::Terminal` run.
 
 ## 3. 构建 / Build
 
@@ -60,6 +56,8 @@ The output is `build/CH32V307VC.elf`, `build/CH32V307VC.hex` and `build/CH32V307
 `wch-riscv.cfg` is an OpenOCD configuration for the WCH-LinkE (`wlinke` adapter, SDI interface, 6 MHz) and needs the WCH build of OpenOCD, which the image includes. `openocd -f wch-riscv.cfg` starts the debug server. In VS Code, `Launch CH32V307` in `.vscode/launch.json` uses this configuration through Cortex-Debug to download and debug `build/CH32V307VC.elf`, with `riscv32-wch-elf-gdb` as `gdbPath`.
 
 At run time the LED on PB4 toggles every 1000 ms, USB OTG FS and OTG HS each enumerate one CDC serial port, and the LibXR terminal is available on the OTG HS serial port.
+
+## 许可 / License
 
 本仓库以 Apache-2.0 发布，见 [LICENSE](LICENSE)；`Core/`、`Peripheral/` 中的 WCH 代码、启动文件和 `FreeRTOS/` 保留各自文件头中的版权与许可声明。
 
