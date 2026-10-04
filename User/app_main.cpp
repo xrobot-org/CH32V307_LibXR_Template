@@ -88,7 +88,9 @@ extern "C" void app_main()
       LibXR::USB::DescriptorStrings::Language::EN_US, "XRobot", "CDC Demo",
       "XRUSB-DEMO-");
 
-  LibXR::USB::CDCUart cdc(4096, 4096, 8), cdc1;
+  using EPNumber = LibXR::USB::Endpoint::EPNumber;
+  LibXR::USB::CDCUart cdc(EPNumber::EP1, EPNumber::EP3, EPNumber::EP2, 4096, 4096, 8);
+  LibXR::USB::CDCUart cdc1(EPNumber::EP1, EPNumber::EP1, EPNumber::EP2);
 
   LibXR::CH32USBOtgFS usb_dev(
       /* EP */

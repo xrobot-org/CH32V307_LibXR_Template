@@ -11,7 +11,7 @@
             "executable": "build/CH32V307VC.elf",
             "runToEntryPoint": "main",
             "device": "CH32V307",
-            "gdbPath": "riscv32-unknown-elf-gdb",
+            "gdbPath": "riscv32-wch-elf-gdb",
             "rtos": "FreeRTOS"
         },
         {
@@ -24,7 +24,7 @@
             ],
             "executable": "build/CH32V307VC.elf",
             "device": "CH32V307",
-            "gdbPath": "riscv32-unknown-elf-gdb",
+            "gdbPath": "riscv32-wch-elf-gdb",
             "rtos": "FreeRTOS"
         }
     ]

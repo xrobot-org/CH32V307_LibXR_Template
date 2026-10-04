@@ -16,7 +16,7 @@ static void DefaultTask(void* pvParameters)
 
 int main(void)
 {
-  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
   SystemInit();
   SystemCoreClockUpdate();
   __enable_irq();

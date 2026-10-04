@@ -156,8 +156,11 @@ SW_Handler:
 	csrr a1, mepc
 	store_x a1, 0( sp )					/* Save updated exception return address. */
 
+	csrci mstatus, 0x8
+	fence.i
 	addi a1, x0, 0x20
 	csrs 0x804, a1
+	fence.i
 
 	load_x sp, xISRStackTop				/* Switch to ISR stack before function call. */
 	jal vTaskSwitchContext
@@ -359,5 +362,4 @@ chip_specific_stack_frame:				/* First add any chip specific registers to the st
 	store_x a1, 0(a0)					/* mret value (pxCode parameter) onto the stack. */
 	ret
 	.endfunc
-
 

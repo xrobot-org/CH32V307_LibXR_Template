@@ -43,7 +43,8 @@
  */
 
 #ifndef INTSYSCR_INEST
-#define INTSYSCR_INEST   INTSYSCR_INEST_EN_4Level
+/* The startup CSR (0x804) selects HPE with 2-level interrupt nesting (0x07). */
+#define INTSYSCR_INEST   INTSYSCR_INEST_EN_2Level
 #endif
 
 /* NVIC Init Structure definition
@@ -90,4 +91,3 @@ void NVIC_Init(NVIC_InitTypeDef *NVIC_InitStruct);
 #endif
 
 #endif 
-

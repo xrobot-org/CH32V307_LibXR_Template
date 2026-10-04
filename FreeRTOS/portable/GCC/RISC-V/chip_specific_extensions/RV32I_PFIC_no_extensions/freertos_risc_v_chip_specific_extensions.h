@@ -56,12 +56,12 @@
 
 #define portasmHAS_SIFIVE_CLINT 0
 #define portasmHAS_MTIME 0
-/* if you want to use FPU, please define ARCH_FPU and enable float point and ABI of gcc */
-#define ARCH_FPU 0
+/* CH32V307 builds use the F extension and the ilp32f ABI. */
+#define ARCH_FPU 1
 
 
 #if ARCH_FPU
-#define portasmADDITIONAL_CONTEXT_SIZE 32 /* Must be even number on 32-bit cores. */
+#define portasmADDITIONAL_CONTEXT_SIZE 34 /* Must be even number on 32-bit cores. */
 .macro portasmSAVE_ADDITIONAL_REGISTERS
     addi sp, sp, -(portasmADDITIONAL_CONTEXT_SIZE* portWORD_SIZE)
     fsw f0, 1*portWORD_SIZE(sp)
@@ -96,6 +96,8 @@
     fsw f29, 30*portWORD_SIZE(sp)
     fsw f30, 31*portWORD_SIZE(sp)
     fsw f31, 32*portWORD_SIZE(sp)
+    csrr t0, fcsr
+    store_x t0, 33*portWORD_SIZE(sp)
 	.endm
 
 .macro portasmRESTORE_ADDITIONAL_REGISTERS
@@ -131,6 +133,8 @@
     flw f29, 30*portWORD_SIZE(sp)
     flw f30, 31*portWORD_SIZE(sp)
     flw f31, 32*portWORD_SIZE(sp)
+    load_x t0, 33*portWORD_SIZE(sp)
+    csrw fcsr, t0
     addi sp, sp, (portasmADDITIONAL_CONTEXT_SIZE* portWORD_SIZE)
 	.endm
 #else
